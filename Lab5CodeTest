@@ -1,0 +1,52 @@
+import unittest
+
+class MinesweeperValidator:
+    def __init__(self, rows, cols):
+        self.rows = rows
+        self.cols = cols
+
+    def validate_input(self, user_input):
+        if not user_input.strip():
+            raise ValueError("Поле введення не може бути порожнім.")
+        parts = user_input.split()
+        if len(parts) != 2 or not all(p.isdigit() or (p.startswith('-') and p[1:].isdigit()) for p in parts):
+            raise ValueError("Некоректний формат координат.")
+        x, y = map(int, parts)
+        if x < 0 or y < 0:
+            raise ValueError("Координати повинні бути невід’ємними.")
+        if x >= self.rows or y >= self.cols:
+            raise ValueError("Координати виходять за межі поля.")
+        return True
+
+
+class TestMinesweeperInput(unittest.TestCase):
+    def setUp(self):
+        self.validator = MinesweeperValidator(5, 5)
+
+    def test_EC1_valid(self):
+        result = self.validator.validate_input("2 3")
+        self.assertTrue(result)
+
+    def test_EC2_negative(self):
+        with self.assertRaises(ValueError) as ctx:
+            self.validator.validate_input("-1 2")
+        self.assertEqual(str(ctx.exception), "Координати повинні бути невід’ємними.")
+
+    def test_EC3_out_of_bounds(self):
+        with self.assertRaises(ValueError) as ctx:
+            self.validator.validate_input("7 8")
+        self.assertEqual(str(ctx.exception), "Координати виходять за межі поля.")
+
+    def test_EC4_non_numeric(self):
+        with self.assertRaises(ValueError) as ctx:
+            self.validator.validate_input("a b")
+        self.assertEqual(str(ctx.exception), "Некоректний формат координат.")
+
+    def test_EC5_empty(self):
+        with self.assertRaises(ValueError) as ctx:
+            self.validator.validate_input("")
+        self.assertEqual(str(ctx.exception), "Поле введення не може бути порожнім.")
+
+
+if __name__ == "__main__":
+    unittest.main()
